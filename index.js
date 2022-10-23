@@ -4,19 +4,20 @@ const saveButton = document.querySelector('#save');
 const resultsButton = document.querySelector('#results');
 const playfield = document.querySelector('.playfield');
 const sizeButtons = document.querySelectorAll('.sizes__button');
-const movesounter = document.querySelector('.game-info__moves-span');
+const movesCounter = document.querySelector('.game-info__moves-span');
 const timeCounter = document.querySelector('.game-info__time-span');
 // playField size
 const playfieldSize = parseFloat(getComputedStyle(playfield).width);
 let puzzleSize = 4;
 let cellSize = playfieldSize / puzzleSize;
 // game array
-let playFieldArray = [];
-let playFieldWinArray = [];
+let playArray = JSON.parse(localStorage.getItem('playArray')) || [];
+let winArray = JSON.parse(localStorage.getItem('winArray')) || [];
 // time & move
-let secondsCounter = 0;
+let secondsCounter = localStorage.getItem('secondsCounter') || 0;
+let isPlaying;
 let timeOut;
-let moves = 0;
+let moves = localStorage.getItem('moves') || 0;
 
 function getRow(pos) {
   return Math.ceil(pos / puzzleSize);
@@ -36,7 +37,7 @@ function getPlayArray(arr) {
   const shuffledArr = [...arr].sort(() => Math.random() - 0.5);
 
   for (let i = 1; i <= shuffledArr.length; i++) {
-    playFieldArray.push({
+    playArray.push({
       value: shuffledArr[i - 1],
       position: i,
       row: (getRow(i) - 1),
@@ -52,7 +53,7 @@ function getWinArray(arr) {
 
   for (let i = 1; i <= arr.length; i++) {
 
-    playFieldWinArray.push({
+    winArray.push({
       value: i,
       position: i,
       row: (getRow(i) - 1),
@@ -63,8 +64,8 @@ function getWinArray(arr) {
 
 function initPlayField() {
   const sourcedArr = [];
-  playFieldArray = [];
-  playFieldWinArray = [];
+  playArray = [];
+  winArray = [];
 
   getWinArray(sourcedArr);
   getPlayArray(sourcedArr);
@@ -72,20 +73,20 @@ function initPlayField() {
 
 function drawPlayField() {
 
-  for (let i = 0; i < playFieldArray.length; i++) {
+  for (let i = 0; i < playArray.length; i++) {
     // create cell
     const playFieldItem = document.createElement('div');
     // cell styles
     playFieldItem.classList.add('playField__item');
     playFieldItem.style.width = `${cellSize}px`;
     playFieldItem.style.height = `${cellSize}px`;
-    playFieldItem.style.top = `${playFieldArray[i].row * cellSize}px`;
-    playFieldItem.style.left = `${playFieldArray[i].column * cellSize}px`;
+    playFieldItem.style.top = `${playArray[i].row * cellSize}px`;
+    playFieldItem.style.left = `${playArray[i].column * cellSize}px`;
     // cell text
-    if (playFieldArray[i].value === playFieldArray.length) {
+    if (playArray[i].value === playArray.length) {
       playFieldItem.classList.add('playfield__item_empty');
     } else {
-      playFieldItem.innerText = playFieldArray[i].value;
+      playFieldItem.innerText = playArray[i].value;
     }
     // add cell to playField
     playfield.append(playFieldItem);
@@ -109,6 +110,7 @@ function resetTimer() {
 };
 
 function startTimer() {
+  isPlaying = true
   let second = secondsCounter;
   let minute = 0;
 
@@ -129,8 +131,17 @@ function startTimer() {
   timeOut = setTimeout(startTimer, 1000);
 };
 
+function stopGame() {
+  if (isPlaying === true) {
+    isPlaying = false;
+    clearTimeout(timeOut);
+  } else {
+    startTimer();
+  }
+};
+
 function showMovesCounter() {
-  movesounter.textContent = moves;
+  movesCounter.textContent = moves;
 }
 
 function startNewGame() {
@@ -142,12 +153,28 @@ function startNewGame() {
   showMovesCounter();
 };
 
-// const startButton = document.querySelector('#start');
-// const stopButton = document.querySelector('#stop');
-// const saveButton = document.querySelector('#save');
+function startGame() {
+  if (movesCounter && timeCounter && winArray.length && playArray.length) {
+    drawPlayField();
+    startTimer();
+    showMovesCounter();
+  } else {
+    startNewGame();
+  }
+};
+
+function saveGame() {
+  localStorage.setItem('secondsCounter', secondsCounter);
+  localStorage.setItem('moves', moves);
+  localStorage.setItem('winArray', JSON.stringify(winArray));
+  localStorage.setItem('playArray', JSON.stringify(playArray));
+};
+
 // const resultsButton = document.querySelector('#results');
 
 startButton.addEventListener('click', startNewGame);
+stopButton.addEventListener('click', stopGame);
+saveButton.addEventListener('click', saveGame);
 sizeButtons.forEach((button) => {
   const buttonValue = button.getAttribute('value');
 
@@ -156,10 +183,10 @@ sizeButtons.forEach((button) => {
   });
 })
 
-// console.log('playFieldWinArray');
-// console.table(playFieldWinArray);
+// console.log('winArray');
+// console.table(winArray);
 
-// console.log('playFieldArray');
-// console.table(playFieldArray);
+// console.log('playArray');
+// console.table(playArray);
 
-startNewGame();
+startGame();
