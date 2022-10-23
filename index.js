@@ -1,5 +1,11 @@
+const startButton = document.querySelector('#start');
+const stopButton = document.querySelector('#stop');
+const saveButton = document.querySelector('#save');
+const resultsButton = document.querySelector('#results');
 const playfield = document.querySelector('.playfield');
 const sizeButtons = document.querySelectorAll('.sizes__button');
+const movesounter = document.querySelector('.game-info__moves-span');
+const timeCounter = document.querySelector('.game-info__time-span');
 // playField size
 const playfieldSize = parseFloat(getComputedStyle(playfield).width);
 let puzzleSize = 4;
@@ -7,6 +13,10 @@ let cellSize = playfieldSize / puzzleSize;
 // game array
 let playFieldArray = [];
 let playFieldWinArray = [];
+// time & move
+let secondsCounter = 0;
+let timeOut;
+let moves = 0;
 
 function getRow(pos) {
   return Math.ceil(pos / puzzleSize);
@@ -49,7 +59,7 @@ function getWinArray(arr) {
       column: (getColumn(i) - 1),
     });
   }
-}
+};
 
 function initPlayField() {
   const sourcedArr = [];
@@ -61,7 +71,6 @@ function initPlayField() {
 };
 
 function drawPlayField() {
-  clearPlayField();
 
   for (let i = 0; i < playFieldArray.length; i++) {
     // create cell
@@ -88,18 +97,62 @@ function clearPlayField() {
   cellSize = playfieldSize / puzzleSize;
 }
 
+function resizePlayField(value) {
+  puzzleSize = value;
 
-initPlayField();
-drawPlayField();
+  startNewGame();
+};
 
+function resetTimer() {
+  secondsCounter = 0;
+  clearTimeout(timeOut)
+};
+
+function startTimer() {
+  let second = secondsCounter;
+  let minute = 0;
+
+  if (secondsCounter >= 60) {
+    minute = Math.floor(secondsCounter / 60);
+    second = (secondsCounter % 60);
+  }
+
+  minute = minute.toString().padStart(2, '0');
+  second = second.toString().padStart(2, '0');
+
+  const currentTime = `${minute}:${second}`;
+  timeCounter.textContent = currentTime;
+  timeCounter.setAttribute('datetime', timeCounter.textContent);
+
+  secondsCounter++;
+
+  timeOut = setTimeout(startTimer, 1000);
+};
+
+function showMovesCounter() {
+  movesounter.textContent = moves;
+}
+
+function startNewGame() {
+  clearPlayField();
+  initPlayField();
+  drawPlayField();
+  resetTimer();
+  startTimer();
+  showMovesCounter();
+};
+
+// const startButton = document.querySelector('#start');
+// const stopButton = document.querySelector('#stop');
+// const saveButton = document.querySelector('#save');
+// const resultsButton = document.querySelector('#results');
+
+startButton.addEventListener('click', startNewGame);
 sizeButtons.forEach((button) => {
   const buttonValue = button.getAttribute('value');
 
-  button.addEventListener('click', function () {
-    puzzleSize = buttonValue;
-
-    initPlayField();
-    drawPlayField();
+  button.addEventListener('click', () => {
+    resizePlayField(buttonValue);
   });
 })
 
@@ -108,3 +161,5 @@ sizeButtons.forEach((button) => {
 
 // console.log('playFieldArray');
 // console.table(playFieldArray);
+
+startNewGame();
