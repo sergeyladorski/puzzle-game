@@ -30,6 +30,7 @@ let timeOut;
 
 function loadGame() {
   puzzleSize = localStorage.getItem('puzzleSize') || 4;
+  puzzleSize = Number(puzzleSize);
   playArray = JSON.parse(localStorage.getItem('playArray')) || [];
   winArray = JSON.parse(localStorage.getItem('winArray')) || [];
   secondsCounter = localStorage.getItem('secondsCounter') || 0;
