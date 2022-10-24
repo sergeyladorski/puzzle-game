@@ -10,9 +10,10 @@ const playfield = document.querySelector('.playfield');
 const sizeButtons = document.querySelectorAll('.sizes__button');
 const movesCounter = document.querySelector('.game-info__moves-span');
 const timeCounter = document.querySelector('.game-info__time-span');
-const winPopup = document.querySelector('.win__popup');
-const popupInfo = winPopup.querySelector('.win__item-info');
-const popupCloseButton = winPopup.querySelector('.win__popup-close-button');
+const popupContainer = document.querySelector('.popup-container');
+const popupInfo = document.querySelector('.popup__info');
+const popupCloseButton = document.querySelector('.popup-close-button');
+
 // playField size
 const playfieldSize = parseFloat(getComputedStyle(playfield).width);
 let puzzleSize = 4;
@@ -27,6 +28,50 @@ let minute = 0;
 let moves = 0;
 let isPlaying;
 let timeOut;
+let context;
+let results = [
+  // just demonstration
+  {
+    moves: 3,
+    puzzleSize: 4,
+  },
+  {
+    moves: 30,
+    puzzleSize: 4,
+  },
+  {
+    moves: 56,
+    puzzleSize: 6,
+  },
+  {
+    moves: 85,
+    puzzleSize: 7,
+  },
+  {
+    moves: 48,
+    puzzleSize: 4,
+  },
+  {
+    moves: 92,
+    puzzleSize: 5,
+  },
+  {
+    moves: 134,
+    puzzleSize: 6,
+  },
+  {
+    moves: 212,
+    puzzleSize: 7,
+  },
+  {
+    moves: 89,
+    puzzleSize: 8,
+  },
+  {
+    moves: 47,
+    puzzleSize: 5,
+  }
+];
 
 function loadGame() {
   puzzleSize = localStorage.getItem('puzzleSize') || 4;
@@ -127,8 +172,14 @@ function gameOver() {
   }
   if (playArray.every(item => item.position === item.value)) {
     winAudio.play();
-    stopGame();
+    context = 'win';
     openPopup();
+
+    results.push({
+      moves: moves,
+      puzzleSize: puzzleSize,
+    });
+    results = results.sort((a, b) => a.moves - b.moves).slice(0, 10);
   }
 };
 
@@ -165,7 +216,6 @@ function calculateTime(min, sec) {
 }
 
 function startTimer() {
-  isPlaying = true
   second = secondsCounter;
   minute = 0;
 
@@ -178,31 +228,40 @@ function startTimer() {
 
 function disablePlayField() {
   playfield.style.zIndex = '-1';
-  stopButton.textContent = 'Start';
 };
 
 function enablePlayField() {
   playfield.style.zIndex = '1';
-  stopButton.textContent = 'Stop';
+};
+
+function manageStopButton() {
+  if (stopButton.value === 'Stop') {
+    stopGame();
+  } else {
+    continueGame();
+  }
 };
 
 function stopGame() {
   clearTimeout(timeOut);
-
-  if (isPlaying === true) {
-    isPlaying = false;
-    disablePlayField();
-  } else {
-    startTimer();
-    enablePlayField();
-  }
+  disablePlayField();
+  stopButton.value = 'Start';
+  stopButton.textContent = stopButton.value;
 };
+
+function continueGame() {
+  startTimer();
+  enablePlayField();
+  stopButton.value = 'Stop';
+  stopButton.textContent = stopButton.value;
+}
 
 function showMovesCounter() {
   movesCounter.textContent = moves;
 };
 
 function startNewGame() {
+  enablePlayField();
   clearTimeout(timeOut);
   resetInfo();
   showMovesCounter();
@@ -380,11 +439,32 @@ function handleSoundButton() {
 
 function setPopupContent() {
   popupInfo.textContent = '';
-  popupInfo.textContent = `Hooray! You solved the puzzle in ${calculateTime(minute, second)} and ${moves} moves!`;
+
+  if (context === 'win') {
+    popupInfo.textContent = `Hooray! You solved the puzzle in ${calculateTime(minute, second)} and ${moves} moves!`;
+  }
+  else if (context === 'results') {
+    popupInfo.textContent = `Top 10 results`;
+    const resultsList = document.createElement('ol');
+    resultsList.className = 'results__list';
+    popupContainer.append(resultsList);
+
+    results.sort((a, b) => a.moves - b.moves).forEach((item) => {
+      const resultsItem = document.createElement('li');
+      resultsItem.innerHTML = `
+      <span class="results__item-moves"></span>
+      <span class="results__item-puzzle-size"></span>
+`
+      resultsItem.querySelector('.results__item-moves').textContent = `moves: ${item.moves} // `;
+      resultsItem.querySelector('.results__item-puzzle-size').textContent = `puzzle size: ${item.puzzleSize}`;
+      resultsList.append(resultsItem);
+    })
+  }
 };
 
 function openPopup() {
-  winPopup.classList.add('win__popup_active');
+  stopGame();
+  popup.classList.add('popup_active');
   setPopupContent();
 
   document.addEventListener('mousedown', handleOverlay);
@@ -392,7 +472,7 @@ function openPopup() {
 };
 
 function handleOverlay(evt) {
-  if (evt.target.classList.contains('win__popup_active')) {
+  if (evt.target.classList.contains('popup_active')) {
     closePopup();
   }
 };
@@ -404,19 +484,34 @@ function closePopupByEsc(evt) {
 };
 
 function closePopup() {
-  winPopup.classList.remove('win__popup_active');
+  continueGame();
+
+  if (context === 'results') {
+    popup.querySelector('.results__list').remove();
+  } else {
+    startNewGame();
+  }
+
+  popup.classList.remove('popup_active');
   document.removeEventListener('mousedown', handleOverlay);
   document.removeEventListener("keydown", closePopupByEsc);
-  stopGame();
-  startNewGame();
 };
 
+function setResults() {
+  localStorage.setItem('results', JSON.stringify(results));
+};
+
+function getResults() {
+  if (localStorage.getItem('results') !== null) {
+    results = JSON.parse(localStorage.getItem('results'));
+  }
+};
 
 startButton.addEventListener('click', () => {
   clearTimeout(timeOut);
   startNewGame();
 });
-stopButton.addEventListener('click', stopGame);
+stopButton.addEventListener('click', manageStopButton);
 saveButton.addEventListener('click', saveGame);
 loadButton.addEventListener('click', loadGame);
 soundButton.addEventListener('click', handleSoundButton);
@@ -429,5 +524,12 @@ sizeButtons.forEach((button) => {
   });
 });
 popupCloseButton.addEventListener('click', closePopup);
+resultsButton.addEventListener('click', () => {
+  context = 'results';
+  openPopup();
+});
+
+window.addEventListener('load', getResults);
+window.addEventListener('beforeunload', setResults);
 
 startNewGame();

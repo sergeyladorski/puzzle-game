@@ -3,12 +3,12 @@ const page = document.querySelector('.page');
 const sectionMenu = document.createElement('section');
 const sectionGame = document.createElement('section');
 const sectionSize = document.createElement('section');
-const winGamePopup = document.createElement('div');
+const popup = document.createElement('div');
 
 sectionMenu.className = 'section section_menu';
 sectionGame.className = 'section section_game';
 sectionSize.className = 'section section_size';
-winGamePopup.className = 'win__popup';
+popup.className = 'popup';
 
 const menu = `
       <ul class="menu">
@@ -17,7 +17,7 @@ const menu = `
         </li>
 
         <li class="menu__item">
-          <button class="menu__button" id="stop">Stop</button>
+          <button class="menu__button" id="stop" value="Stop">Stop</button>
         </li>
 
         <li class="menu__item">
@@ -84,20 +84,20 @@ const size = `
         </li>
       </ul>
 `
-
-const popup = `
-      <div class="win__popup-container">
-        <div class="win__item-info"></div>
-        <button class="win__popup-close-button"></button>
+const popupDefault = `
+      <div class="popup-container">
+        <div class="popup__info"></div>
+        <button class="popup-close-button"></button>
       </div>
 `
+
 
 sectionMenu.innerHTML = menu;
 sectionGame.innerHTML = game;
 sectionSize.innerHTML = size;
-winGamePopup.innerHTML = popup;
+popup.innerHTML = popupDefault;
 
 page.append(sectionMenu);
 page.append(sectionGame);
 page.append(sectionSize);
-page.append(winGamePopup);
+page.append(popup);
