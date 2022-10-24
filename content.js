@@ -23,7 +23,15 @@ const menu = `
         </li>
 
         <li class="menu__item">
+          <button class="menu__button" id="load">Load</button>
+        </li>
+
+        <li class="menu__item">
           <button class="menu__button" id="results">Results</button>
+        </li>
+
+        <li class="menu__item">
+          <button class="menu__button menu__button_sound" id="sound"></button>
         </li>
       </ul>
     `

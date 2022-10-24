@@ -1,7 +1,11 @@
+const moveAudio = new Audio('audio/move.mp3');
+const winAudio = new Audio('audio/game-over.mp3');
 const startButton = document.querySelector('#start');
 const stopButton = document.querySelector('#stop');
 const saveButton = document.querySelector('#save');
+const loadButton = document.querySelector('#load');
 const resultsButton = document.querySelector('#results');
+const soundButton = document.querySelector('#sound');
 const playfield = document.querySelector('.playfield');
 const sizeButtons = document.querySelectorAll('.sizes__button');
 const movesCounter = document.querySelector('.game-info__moves-span');
@@ -11,13 +15,27 @@ const playfieldSize = parseFloat(getComputedStyle(playfield).width);
 let puzzleSize = 2;
 let cellSize = playfieldSize / puzzleSize;
 // game array
-let playArray = JSON.parse(localStorage.getItem('playArray')) || [];
-let winArray = JSON.parse(localStorage.getItem('winArray')) || [];
+let playArray = []; gameOver
+let winArray = [];
 // time & move
-let secondsCounter = localStorage.getItem('secondsCounter') || 0;
+let secondsCounter = 0;
+let moves = 0;
 let isPlaying;
 let timeOut;
-let moves = localStorage.getItem('moves') || 0;
+
+function loadGame() {
+  puzzleSize = localStorage.getItem('puzzleSize') || 4;
+  playArray = JSON.parse(localStorage.getItem('playArray')) || [];
+  winArray = JSON.parse(localStorage.getItem('winArray')) || [];
+  secondsCounter = localStorage.getItem('secondsCounter') || 0;
+  moves = localStorage.getItem('moves') || 0;
+
+  clearTimeout(timeOut);
+  drawPlayField();
+  startTimer();
+  showMovesCounter();
+  gameOver();
+}
 
 function getRow(pos) {
   return Math.ceil(pos / puzzleSize);
@@ -72,7 +90,7 @@ function initPlayField() {
 };
 
 function drawPlayField() {
-  playfield.innerHTML = '';
+  clearPlayField();
 
   for (let i = 0; i < playArray.length; i++) {
     // create cell
@@ -84,12 +102,12 @@ function drawPlayField() {
     playFieldItem.style.top = `${playArray[i].row * cellSize}px`;
     playFieldItem.style.left = `${playArray[i].column * cellSize}px`;
     // add position attribute
-    playFieldItem.setAttribute('position', playArray[i].position);
+    playFieldItem.setAttribute('value', playArray[i].value);
     // cell text
     if (playArray[i].value === playArray.length) {
       playFieldItem.classList.add('playfield__item_empty');
     } else {
-      playFieldItem.innerText = playArray[i].value;
+      playFieldItem.textContent = playArray[i].value;
     }
     // add cell to playField
     playfield.append(playFieldItem);
@@ -97,8 +115,15 @@ function drawPlayField() {
 };
 
 function gameOver() {
-  playArray.every(item => item.position === item.value) && alert(`Game over in: ${moves} moves and ${startTimer()}`)
-}
+  if (playArray.every(item => item.position === item.value) && (moves === 0)) {
+    startNewGame();
+  }
+  if (playArray.every(item => item.position === item.value)) {
+    winAudio.play();
+    alert(`Game over in: ${moves} moves and ${startTimer()}`);
+    startNewGame();
+  }
+};
 
 function clearPlayField() {
   playfield.innerHTML = '';
@@ -106,12 +131,13 @@ function clearPlayField() {
 }
 
 function resizePlayField(value) {
-  puzzleSize = value;
+  puzzleSize = Number(value);
 
   startNewGame();
 };
 
-function resetTimer() {
+function resetInfo() {
+  moves = 0;
   secondsCounter = 0;
   clearTimeout(timeOut)
 };
@@ -140,12 +166,24 @@ function startTimer() {
   return currentTime;
 };
 
+function disablePlayField() {
+  playfield.style.zIndex = '-1';
+  stopButton.textContent = 'Start';
+};
+
+function enablePlayField() {
+  playfield.style.zIndex = '1';
+  stopButton.textContent = 'Stop';
+};
+
 function stopGame() {
   if (isPlaying === true) {
     isPlaying = false;
     clearTimeout(timeOut);
+    disablePlayField();
   } else {
     startTimer();
+    enablePlayField();
   }
 };
 
@@ -154,73 +192,44 @@ function showMovesCounter() {
 };
 
 function startNewGame() {
-  clearPlayField();
   initPlayField();
   drawPlayField();
-  resetTimer();
+  resetInfo();
   startTimer();
   showMovesCounter();
-};
-
-function startGame() {
-  if (movesCounter && timeCounter && winArray.length && playArray.length) {
-    drawPlayField();
-    startTimer();
-    showMovesCounter();
-  } else {
-    startNewGame();
-  }
+  gameOver();
 };
 
 function saveGame() {
+  localStorage.setItem('puzzleSize', puzzleSize);
   localStorage.setItem('secondsCounter', secondsCounter);
   localStorage.setItem('moves', moves);
   localStorage.setItem('winArray', JSON.stringify(winArray));
   localStorage.setItem('playArray', JSON.stringify(playArray));
 };
 
-// const resultsButton = document.querySelector('#results');
+function handleCellClick(evt) {
 
-startButton.addEventListener('click', startNewGame);
-stopButton.addEventListener('click', stopGame);
-saveButton.addEventListener('click', saveGame);
-sizeButtons.forEach((button) => {
-  const buttonValue = button.getAttribute('value');
-
-  button.addEventListener('click', () => {
-    resizePlayField(buttonValue);
-  });
-})
-
-
-
-playfield.addEventListener('click', handleCellClick);
-
-
-async function handleCellClick(evt) {
-  // console.log(evt.target.getAttribute('position'))
-  // console.log(getRightCell())
-  // console.log(getLeftCell())
-  // console.log(getAboveCell())
-  // console.log(getBelowCell())
-
-  if (getRightCell() && evt.target.getAttribute('position') === getRightCell().position.toString()) {
+  if (getRightCell() && evt.target.getAttribute('value') === getRightCell().value.toString()) {
+    moveAudio.play();
     moveLeft();
     updateMovesCounter();
   }
-  else if (getLeftCell() && evt.target.getAttribute('position') === getLeftCell().position.toString()) {
+  else if (getLeftCell() && evt.target.getAttribute('value') === getLeftCell().value.toString()) {
+    moveAudio.play();
     moveRight();
     updateMovesCounter();
   }
-  else if (getAboveCell() && evt.target.getAttribute('position') === getAboveCell().position.toString()) {
+  else if (getAboveCell() && evt.target.getAttribute('value') === getAboveCell().value.toString()) {
+    moveAudio.play();
     moveDown();
     updateMovesCounter();
   }
-  else if (getBelowCell() && evt.target.getAttribute('position') === getBelowCell().position.toString()) {
+  else if (getBelowCell() && evt.target.getAttribute('value') === getBelowCell().value.toString()) {
+    moveAudio.play();
     moveUp();
     updateMovesCounter();
   }
-
 
   drawPlayField();
   showMovesCounter();
@@ -235,6 +244,7 @@ function updateMovesCounter() {
 function moveLeft() {
   const emptyCell = getEmptyCell();
   const rightCell = getRightCell();
+
 
   if (rightCell) {
     swapCells(emptyCell, rightCell, true);
@@ -268,18 +278,19 @@ function moveDown() {
   }
 };
 
-function swapCells(source, target, isX) {
+function swapCells(source, target, isRowSwipe) {
   const temp = source.value;
 
-  playArray[source.position - 1].value = target.value;
-  playArray[target.position - 1].value = temp;
+  source.value = target.value;
+  target.value = temp;
 
-  if (isX) {
+  if (isRowSwipe) {
     const temp = source.row;
 
     source.row = target.row;
     target.row = temp;
-  } else {
+  }
+  else {
     const temp = source.column;
 
     source.column = target.column;
@@ -291,30 +302,32 @@ function swapCells(source, target, isX) {
 function getEmptyCell() {
   return playArray.find(item => item.value === playArray.length);
 };
-
+// get cell nearby
 function getRightCell() {
   const emptyCell = getEmptyCell();
-  const isEdge = getColumn(emptyCell.position) === puzzleSize
+  const isEdge = getColumn(emptyCell.position) === puzzleSize;
 
   if (isEdge) {
     return null;
   }
   const cell = getCellByPosition(emptyCell.position + 1);
   return cell;
-}
+};
+
 function getLeftCell() {
   const emptyCell = getEmptyCell();
-  const isEdge = getColumn(emptyCell.position) === 1
+  const isEdge = getColumn(emptyCell.position) === 1;
 
   if (isEdge) {
     return null;
   }
   const cell = getCellByPosition(emptyCell.position - 1);
   return cell;
-}
+};
+
 function getAboveCell() {
   const emptyCell = getEmptyCell();
-  const isEdge = getRow(emptyCell.position) === 1
+  const isEdge = getRow(emptyCell.position) === 1;
 
   if (isEdge) {
     return null;
@@ -324,17 +337,47 @@ function getAboveCell() {
 }
 function getBelowCell() {
   const emptyCell = getEmptyCell();
-  const isEdge = getRow(emptyCell.position) === puzzleSize
+  const isEdge = getRow(emptyCell.position) === puzzleSize;
 
   if (isEdge) {
     return null;
   }
+
   const cell = getCellByPosition(emptyCell.position + puzzleSize);
   return cell;
-}
+};
 
 function getCellByPosition(pos) {
   return playArray.find(item => item.position === pos);
 };
 
-startGame();
+isSound = true;
+
+function handleSoundButton() {
+  moveAudio.muted = isSound;
+  winAudio.muted = isSound;
+
+  if (isSound) {
+    soundButton.classList.add('menu__button_muted');
+  } else {
+    soundButton.classList.remove('menu__button_muted');
+  }
+
+  isSound = !isSound;
+};
+
+startButton.addEventListener('click', startNewGame);
+stopButton.addEventListener('click', stopGame);
+saveButton.addEventListener('click', saveGame);
+loadButton.addEventListener('click', loadGame);
+soundButton.addEventListener('click', handleSoundButton);
+playfield.addEventListener('click', handleCellClick);
+sizeButtons.forEach((button) => {
+  const buttonValue = button.getAttribute('value');
+
+  button.addEventListener('click', () => {
+    resizePlayField(buttonValue);
+  });
+})
+
+startNewGame();

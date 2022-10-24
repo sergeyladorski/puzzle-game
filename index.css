@@ -48,6 +48,22 @@
   background: #950d0d;
 }
 
+.menu__button_sound,
+.menu__button_sound:hover {
+  width: 40px;
+  height: 33px;
+  padding: 0;
+  background-image: url(./icons/sound.svg);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 28px 28px;
+}
+
+.menu__button_muted,
+.menu__button_muted:hover {
+  background-image: url(./icons/mute.svg);
+}
+
 .game-info {
   margin: 0 auto;
   display: flex;
@@ -87,7 +103,7 @@
   box-sizing: border-box;
   border: 1px solid #c5c5c5;
   font-size: 22px;
-  transition: all 0.5s ease;
+  transition: all 1s ease;
 }
 
 .playfield__item_empty {
