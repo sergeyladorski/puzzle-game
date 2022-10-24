@@ -96,6 +96,7 @@ function initPlayField() {
 
 function drawPlayField() {
   clearPlayField();
+  cellSize = playfieldSize / puzzleSize;
 
   for (let i = 0; i < playArray.length; i++) {
     // create cell
@@ -132,7 +133,6 @@ function gameOver() {
 
 function clearPlayField() {
   playfield.innerHTML = '';
-  cellSize = playfieldSize / puzzleSize;
 }
 
 function resizePlayField(value) {
