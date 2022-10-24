@@ -65,6 +65,10 @@
   background-image: url(./icons/mute.svg);
 }
 
+.stop-game {
+  background-color: #666666;
+}
+
 .game-info {
   margin: 0 auto;
   display: flex;

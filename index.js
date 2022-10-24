@@ -247,6 +247,7 @@ function stopGame() {
   disablePlayField();
   stopButton.value = 'Start';
   stopButton.textContent = stopButton.value;
+  stopButton.classList.add('stop-game');
 };
 
 function continueGame() {
@@ -254,6 +255,7 @@ function continueGame() {
   enablePlayField();
   stopButton.value = 'Stop';
   stopButton.textContent = stopButton.value;
+  stopButton.classList.remove('stop-game');
 }
 
 function showMovesCounter() {
