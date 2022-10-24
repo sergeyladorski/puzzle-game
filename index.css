@@ -87,6 +87,7 @@
   box-sizing: border-box;
   border: 1px solid #c5c5c5;
   font-size: 22px;
+  transition: all 0.5s ease;
 }
 
 .playfield__item_empty {

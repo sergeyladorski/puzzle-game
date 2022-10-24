@@ -8,7 +8,7 @@ const movesCounter = document.querySelector('.game-info__moves-span');
 const timeCounter = document.querySelector('.game-info__time-span');
 // playField size
 const playfieldSize = parseFloat(getComputedStyle(playfield).width);
-let puzzleSize = 4;
+let puzzleSize = 2;
 let cellSize = playfieldSize / puzzleSize;
 // game array
 let playArray = JSON.parse(localStorage.getItem('playArray')) || [];
@@ -72,6 +72,7 @@ function initPlayField() {
 };
 
 function drawPlayField() {
+  playfield.innerHTML = '';
 
   for (let i = 0; i < playArray.length; i++) {
     // create cell
@@ -82,6 +83,8 @@ function drawPlayField() {
     playFieldItem.style.height = `${cellSize}px`;
     playFieldItem.style.top = `${playArray[i].row * cellSize}px`;
     playFieldItem.style.left = `${playArray[i].column * cellSize}px`;
+    // add position attribute
+    playFieldItem.setAttribute('position', playArray[i].position);
     // cell text
     if (playArray[i].value === playArray.length) {
       playFieldItem.classList.add('playfield__item_empty');
@@ -92,6 +95,10 @@ function drawPlayField() {
     playfield.append(playFieldItem);
   }
 };
+
+function gameOver() {
+  playArray.every(item => item.position === item.value) && alert(`Game over in: ${moves} moves and ${startTimer()}`)
+}
 
 function clearPlayField() {
   playfield.innerHTML = '';
@@ -129,6 +136,8 @@ function startTimer() {
   secondsCounter++;
 
   timeOut = setTimeout(startTimer, 1000);
+
+  return currentTime;
 };
 
 function stopGame() {
@@ -142,7 +151,7 @@ function stopGame() {
 
 function showMovesCounter() {
   movesCounter.textContent = moves;
-}
+};
 
 function startNewGame() {
   clearPlayField();
@@ -183,10 +192,149 @@ sizeButtons.forEach((button) => {
   });
 })
 
-// console.log('winArray');
-// console.table(winArray);
 
-// console.log('playArray');
-// console.table(playArray);
+
+playfield.addEventListener('click', handleCellClick);
+
+
+async function handleCellClick(evt) {
+  // console.log(evt.target.getAttribute('position'))
+  // console.log(getRightCell())
+  // console.log(getLeftCell())
+  // console.log(getAboveCell())
+  // console.log(getBelowCell())
+
+  if (getRightCell() && evt.target.getAttribute('position') === getRightCell().position.toString()) {
+    moveLeft();
+    updateMovesCounter();
+  }
+  else if (getLeftCell() && evt.target.getAttribute('position') === getLeftCell().position.toString()) {
+    moveRight();
+    updateMovesCounter();
+  }
+  else if (getAboveCell() && evt.target.getAttribute('position') === getAboveCell().position.toString()) {
+    moveDown();
+    updateMovesCounter();
+  }
+  else if (getBelowCell() && evt.target.getAttribute('position') === getBelowCell().position.toString()) {
+    moveUp();
+    updateMovesCounter();
+  }
+
+
+  drawPlayField();
+  showMovesCounter();
+  gameOver();
+};
+
+function updateMovesCounter() {
+  moves++;
+  showMovesCounter();
+};
+
+function moveLeft() {
+  const emptyCell = getEmptyCell();
+  const rightCell = getRightCell();
+
+  if (rightCell) {
+    swapCells(emptyCell, rightCell, true);
+  }
+};
+
+function moveRight() {
+  const emptyCell = getEmptyCell();
+  const leftCell = getLeftCell();
+
+  if (leftCell) {
+    swapCells(emptyCell, leftCell, true);
+  }
+};
+
+function moveUp() {
+  const emptyCell = getEmptyCell();
+  const downCell = getBelowCell();
+
+  if (downCell) {
+    swapCells(emptyCell, downCell, false);
+  }
+};
+
+function moveDown() {
+  const emptyCell = getEmptyCell();
+  const upCell = getAboveCell();
+
+  if (upCell) {
+    swapCells(emptyCell, upCell, false);
+  }
+};
+
+function swapCells(source, target, isX) {
+  const temp = source.value;
+
+  playArray[source.position - 1].value = target.value;
+  playArray[target.position - 1].value = temp;
+
+  if (isX) {
+    const temp = source.row;
+
+    source.row = target.row;
+    target.row = temp;
+  } else {
+    const temp = source.column;
+
+    source.column = target.column;
+    target.column = temp;
+  }
+};
+
+// the method find returns object with the empty cell
+function getEmptyCell() {
+  return playArray.find(item => item.value === playArray.length);
+};
+
+function getRightCell() {
+  const emptyCell = getEmptyCell();
+  const isEdge = getColumn(emptyCell.position) === puzzleSize
+
+  if (isEdge) {
+    return null;
+  }
+  const cell = getCellByPosition(emptyCell.position + 1);
+  return cell;
+}
+function getLeftCell() {
+  const emptyCell = getEmptyCell();
+  const isEdge = getColumn(emptyCell.position) === 1
+
+  if (isEdge) {
+    return null;
+  }
+  const cell = getCellByPosition(emptyCell.position - 1);
+  return cell;
+}
+function getAboveCell() {
+  const emptyCell = getEmptyCell();
+  const isEdge = getRow(emptyCell.position) === 1
+
+  if (isEdge) {
+    return null;
+  }
+  const cell = getCellByPosition(emptyCell.position - puzzleSize);
+  return cell;
+}
+function getBelowCell() {
+  const emptyCell = getEmptyCell();
+  const isEdge = getRow(emptyCell.position) === puzzleSize
+
+  if (isEdge) {
+    return null;
+  }
+  const cell = getCellByPosition(emptyCell.position + puzzleSize);
+  return cell;
+}
+
+function getCellByPosition(pos) {
+  return playArray.find(item => item.position === pos);
+};
 
 startGame();
