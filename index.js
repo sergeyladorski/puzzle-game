@@ -12,7 +12,7 @@ const movesCounter = document.querySelector('.game-info__moves-span');
 const timeCounter = document.querySelector('.game-info__time-span');
 // playField size
 const playfieldSize = parseFloat(getComputedStyle(playfield).width);
-let puzzleSize = 2;
+let puzzleSize = 4;
 let cellSize = playfieldSize / puzzleSize;
 // game array
 let playArray = []; gameOver
