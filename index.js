@@ -10,6 +10,9 @@ const playfield = document.querySelector('.playfield');
 const sizeButtons = document.querySelectorAll('.sizes__button');
 const movesCounter = document.querySelector('.game-info__moves-span');
 const timeCounter = document.querySelector('.game-info__time-span');
+const winPopup = document.querySelector('.win__popup');
+const popupInfo = winPopup.querySelector('.win__item-info');
+const popupCloseButton = winPopup.querySelector('.win__popup-close-button');
 // playField size
 const playfieldSize = parseFloat(getComputedStyle(playfield).width);
 let puzzleSize = 4;
@@ -122,8 +125,8 @@ function gameOver() {
   }
   if (playArray.every(item => item.position === item.value)) {
     winAudio.play();
-    alert(`Hooray! You solved the puzzle in ${calculateTime(minute, second)} and ${moves} moves!`);
-    startNewGame();
+    stopGame();
+    openPopup();
   }
 };
 
@@ -183,9 +186,10 @@ function enablePlayField() {
 };
 
 function stopGame() {
+  clearTimeout(timeOut);
+
   if (isPlaying === true) {
     isPlaying = false;
-    clearTimeout(timeOut);
     disablePlayField();
   } else {
     startTimer();
@@ -198,6 +202,7 @@ function showMovesCounter() {
 };
 
 function startNewGame() {
+  clearTimeout(timeOut);
   resetInfo();
   showMovesCounter();
   initPlayField();
@@ -372,7 +377,44 @@ function handleSoundButton() {
   isSound = !isSound;
 };
 
-startButton.addEventListener('click', startNewGame);
+function setPopupContent() {
+  popupInfo.textContent = '';
+  popupInfo.textContent = `Hooray! You solved the puzzle in ${calculateTime(minute, second)} and ${moves} moves!`;
+};
+
+function openPopup() {
+  winPopup.classList.add('win__popup_active');
+  setPopupContent();
+
+  document.addEventListener('mousedown', handleOverlay);
+  document.addEventListener("keydown", closePopup);
+};
+
+function handleOverlay(evt) {
+  if (evt.target.classList.contains('win__popup_active')) {
+    closePopup();
+  }
+};
+
+function closePopupByEsc(evt) {
+  if (evt.key === "Escape") {
+    closePopup();
+  }
+};
+
+function closePopup() {
+  winPopup.classList.remove('win__popup_active');
+  document.removeEventListener('mousedown', handleOverlay);
+  document.removeEventListener("keydown", closePopupByEsc);
+  stopGame();
+  startNewGame();
+};
+
+
+startButton.addEventListener('click', () => {
+  clearTimeout(timeOut);
+  startNewGame();
+});
 stopButton.addEventListener('click', stopGame);
 saveButton.addEventListener('click', saveGame);
 loadButton.addEventListener('click', loadGame);
@@ -384,6 +426,7 @@ sizeButtons.forEach((button) => {
   button.addEventListener('click', () => {
     resizePlayField(buttonValue);
   });
-})
+});
+popupCloseButton.addEventListener('click', closePopup);
 
 startNewGame();
