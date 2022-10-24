@@ -82,11 +82,12 @@ function loadGame() {
   moves = localStorage.getItem('moves') || 0;
 
   clearTimeout(timeOut);
+  enablePlayField();
   drawPlayField();
   startTimer();
   showMovesCounter();
   gameOver();
-}
+};
 
 function getRow(pos) {
   return Math.ceil(pos / puzzleSize);
