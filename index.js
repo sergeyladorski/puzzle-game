@@ -15,10 +15,12 @@ const playfieldSize = parseFloat(getComputedStyle(playfield).width);
 let puzzleSize = 4;
 let cellSize = playfieldSize / puzzleSize;
 // game array
-let playArray = []; gameOver
+let playArray = [];
 let winArray = [];
 // time & move
 let secondsCounter = 0;
+let second = 0;
+let minute = 0;
 let moves = 0;
 let isPlaying;
 let timeOut;
@@ -120,7 +122,7 @@ function gameOver() {
   }
   if (playArray.every(item => item.position === item.value)) {
     winAudio.play();
-    alert(`Game over in: ${moves} moves and ${startTimer()}`);
+    alert(`Hooray! You solved the puzzle in ${calculateTime(minute, second)} and ${moves} moves!`);
     startNewGame();
   }
 };
@@ -137,33 +139,37 @@ function resizePlayField(value) {
 };
 
 function resetInfo() {
+  clearTimeout(timeOut)
   moves = 0;
   secondsCounter = 0;
-  clearTimeout(timeOut)
 };
+
+function calculateTime(min, sec) {
+  if (secondsCounter >= 60) {
+    min = Math.floor(secondsCounter / 60);
+    sec = (secondsCounter % 60);
+  }
+
+  min = min.toString().padStart(2, '0');
+  sec = sec.toString().padStart(2, '0');
+
+  const currentTime = `${min}:${sec}`;
+  timeCounter.textContent = currentTime;
+  timeCounter.setAttribute('datetime', timeCounter.textContent);
+
+  return currentTime;
+}
 
 function startTimer() {
   isPlaying = true
-  let second = secondsCounter;
-  let minute = 0;
+  second = secondsCounter;
+  minute = 0;
 
-  if (secondsCounter >= 60) {
-    minute = Math.floor(secondsCounter / 60);
-    second = (secondsCounter % 60);
-  }
-
-  minute = minute.toString().padStart(2, '0');
-  second = second.toString().padStart(2, '0');
-
-  const currentTime = `${minute}:${second}`;
-  timeCounter.textContent = currentTime;
-  timeCounter.setAttribute('datetime', timeCounter.textContent);
+  calculateTime(minute, second);
 
   secondsCounter++;
 
   timeOut = setTimeout(startTimer, 1000);
-
-  return currentTime;
 };
 
 function disablePlayField() {
@@ -192,12 +198,12 @@ function showMovesCounter() {
 };
 
 function startNewGame() {
-  initPlayField();
-  drawPlayField();
   resetInfo();
-  startTimer();
   showMovesCounter();
+  initPlayField();
   gameOver();
+  drawPlayField();
+  startTimer();
 };
 
 function saveGame() {

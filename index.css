@@ -19,6 +19,7 @@
   flex-direction: column;
   gap: 5px;
   margin-bottom: 8px;
+  position: relative;
 }
 
 .section_size {
@@ -84,7 +85,6 @@
 .playfield {
   width: 400px;
   height: 400px;
-  /* border: 1px solid #c5c5c5; */
   position: relative;
 }
 
