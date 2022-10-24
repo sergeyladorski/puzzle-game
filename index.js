@@ -228,10 +228,16 @@ function startTimer() {
 
 function disablePlayField() {
   playfield.style.zIndex = '-1';
+  stopButton.value = 'Start';
+  stopButton.textContent = stopButton.value;
+  stopButton.classList.add('stop-game');
 };
 
 function enablePlayField() {
   playfield.style.zIndex = '1';
+  stopButton.value = 'Stop';
+  stopButton.textContent = stopButton.value;
+  stopButton.classList.remove('stop-game');
 };
 
 function manageStopButton() {
@@ -245,17 +251,11 @@ function manageStopButton() {
 function stopGame() {
   clearTimeout(timeOut);
   disablePlayField();
-  stopButton.value = 'Start';
-  stopButton.textContent = stopButton.value;
-  stopButton.classList.add('stop-game');
 };
 
 function continueGame() {
   startTimer();
   enablePlayField();
-  stopButton.value = 'Stop';
-  stopButton.textContent = stopButton.value;
-  stopButton.classList.remove('stop-game');
 }
 
 function showMovesCounter() {
