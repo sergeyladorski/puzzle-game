@@ -239,11 +239,7 @@ function checkGameArray() {
     return item.value !== emptyCellValue;
   });
 
-  // console.table(noEmptyCell)
-
   noEmptyCell = noEmptyCell.map(item => item.value)
-
-  // console.log('noEmptyCell', noEmptyCell)
 
   noEmptyCell.forEach((item, index) => {
 
@@ -255,9 +251,7 @@ function checkGameArray() {
     }
   })
 
-
   playArray.forEach((item) => {
-    // console.table(item)
     if (item.value === (emptyCellValue)) {
       emptyCellRowNumber = item.row + 1;
 
@@ -269,9 +263,6 @@ function checkGameArray() {
 
   sum += emptyCellRowNumber;
 
-  console.log('sum', sum, 'emptyCellRowNumber', emptyCellRowNumber)
-
-  console.log(sum % 2 === playArray.length % 2)
   return sum % 2 === playArray.length % 2;
 }
 
