@@ -208,6 +208,15 @@
   visibility: visible;
 }
 
+.results__list {
+  margin: 10px auto 0;
+  text-align: center;
+}
+.results__list-empty {
+  font-size: 20px;
+  line-height: 1.2;
+}
+
 @media screen and (max-width: 549px) {
   .menu {
     max-width: 90%;

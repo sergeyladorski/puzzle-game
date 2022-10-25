@@ -15,7 +15,7 @@ const popupInfo = document.querySelector('.popup__info');
 const popupCloseButton = document.querySelector('.popup-close-button');
 
 // playField size
-const playfieldSize = parseFloat(getComputedStyle(playfield).width);
+let playfieldSize = parseFloat(getComputedStyle(playfield).width);
 let puzzleSize = 4;
 let cellSize = playfieldSize / puzzleSize;
 // game array
@@ -29,49 +29,7 @@ let moves = 0;
 let isPlaying;
 let timeOut;
 let context;
-let results = [
-  // just demonstration
-  {
-    moves: 3,
-    puzzleSize: 4,
-  },
-  {
-    moves: 30,
-    puzzleSize: 4,
-  },
-  {
-    moves: 56,
-    puzzleSize: 6,
-  },
-  {
-    moves: 85,
-    puzzleSize: 7,
-  },
-  {
-    moves: 48,
-    puzzleSize: 4,
-  },
-  {
-    moves: 92,
-    puzzleSize: 5,
-  },
-  {
-    moves: 134,
-    puzzleSize: 6,
-  },
-  {
-    moves: 212,
-    puzzleSize: 7,
-  },
-  {
-    moves: 89,
-    puzzleSize: 8,
-  },
-  {
-    moves: 47,
-    puzzleSize: 5,
-  }
-];
+let results = [];
 
 function loadGame() {
   puzzleSize = localStorage.getItem('puzzleSize') || 4;
@@ -139,6 +97,10 @@ function initPlayField() {
 
   getWinArray(sourcedArr);
   getPlayArray(sourcedArr);
+
+  while (!checkGameArray()) {
+    initPlayField();
+  }
 };
 
 function drawPlayField() {
@@ -165,6 +127,11 @@ function drawPlayField() {
     // add cell to playField
     playfield.append(playFieldItem);
   }
+};
+
+function handleWindowResize() {
+  playfieldSize = parseFloat(getComputedStyle(playfield).width);
+  drawPlayField();
 };
 
 function gameOver() {
@@ -263,15 +230,65 @@ function showMovesCounter() {
   movesCounter.textContent = moves;
 };
 
+function checkGameArray() {
+  let sum = 0;
+  const emptyCellValue = puzzleSize ** 2;
+  let emptyCellRowNumber;
+
+  let noEmptyCell = playArray.filter(item => {
+    return item.value !== emptyCellValue;
+  });
+
+  // console.table(noEmptyCell)
+
+  noEmptyCell = noEmptyCell.map(item => item.value)
+
+  // console.log('noEmptyCell', noEmptyCell)
+
+  noEmptyCell.forEach((item, index) => {
+
+    for (let j = index; j < noEmptyCell.length; j++) {
+      if (item > noEmptyCell[j]) {
+
+        sum += 1;
+      }
+    }
+  })
+
+
+  playArray.forEach((item) => {
+    // console.table(item)
+    if (item.value === (emptyCellValue)) {
+      emptyCellRowNumber = item.row + 1;
+
+      if (item.row % 2 === 1 && puzzleSize % 2 === 1) {
+        emptyCellRowNumber += 1;
+      }
+    }
+  })
+
+  sum += emptyCellRowNumber;
+
+  console.log('sum', sum, 'emptyCellRowNumber', emptyCellRowNumber)
+
+  console.log(sum % 2 === playArray.length % 2)
+  return sum % 2 === playArray.length % 2;
+}
+
 function startNewGame() {
   enablePlayField();
   clearTimeout(timeOut);
   resetInfo();
   showMovesCounter();
+
+  // while (!checkGameArray()) {
   initPlayField();
+  // }
+
   gameOver();
   drawPlayField();
   startTimer();
+  checkGameArray();
 };
 
 function saveGame() {
@@ -448,20 +465,43 @@ function setPopupContent() {
   }
   else if (context === 'results') {
     popupInfo.textContent = `Top 10 results`;
-    const resultsList = document.createElement('ol');
-    resultsList.className = 'results__list';
-    popupContainer.append(resultsList);
 
-    results.sort((a, b) => a.moves - b.moves).forEach((item) => {
-      const resultsItem = document.createElement('li');
-      resultsItem.innerHTML = `
-      <span class="results__item-moves"></span>
-      <span class="results__item-puzzle-size"></span>
-`
-      resultsItem.querySelector('.results__item-moves').textContent = `moves: ${item.moves} // `;
-      resultsItem.querySelector('.results__item-puzzle-size').textContent = `puzzle size: ${item.puzzleSize}`;
-      resultsList.append(resultsItem);
-    })
+
+    if (results.length === 0) {
+      const resultsList = document.createElement('div');
+      resultsList.className = 'results__list';
+      popupContainer.append(resultsList);
+
+      resultsList.innerHTML = `
+      <span class="results__list-empty">
+        Sorry, the results list is empty.
+        <br>
+        You haven't won any game yet.
+        <br>
+        When you do win a game
+        <br>
+        the result will be shown here.
+        <br>
+        Good luck!
+      </span>
+      `
+    } else {
+      const resultsList = document.createElement('ol');
+      resultsList.className = 'results__list';
+      popupContainer.append(resultsList);
+
+      results.sort((a, b) => a.moves - b.moves).forEach((item) => {
+        const resultsItem = document.createElement('li');
+        resultsItem.innerHTML = `
+        <span class="results__item-moves"></span>
+        <span class="results__item-puzzle-size"></span>
+  `
+        resultsItem.querySelector('.results__item-moves').textContent = `moves: ${item.moves} // `;
+        resultsItem.querySelector('.results__item-puzzle-size').textContent = `puzzle size: ${item.puzzleSize}`;
+        resultsList.append(resultsItem);
+      })
+    }
+
   }
 };
 
@@ -501,7 +541,9 @@ function closePopup() {
 };
 
 function setResults() {
-  localStorage.setItem('results', JSON.stringify(results));
+  if (results.length !== 0) {
+    localStorage.setItem('results', JSON.stringify(results));
+  }
 };
 
 function getResults() {
@@ -534,5 +576,6 @@ resultsButton.addEventListener('click', () => {
 
 window.addEventListener('load', getResults);
 window.addEventListener('beforeunload', setResults);
+window.addEventListener('resize', handleWindowResize);
 
 startNewGame();
