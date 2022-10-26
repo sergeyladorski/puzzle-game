@@ -533,13 +533,13 @@ function closePopup() {
 
 function setResults() {
   if (results.length !== 0) {
-    localStorage.setItem('results', JSON.stringify(results));
+    localStorage.setItem('resultsTable', JSON.stringify(results));
   }
 };
 
 function getResults() {
-  if (localStorage.getItem('results') !== null) {
-    results = JSON.parse(localStorage.getItem('results'));
+  if (localStorage.getItem('resultsTable') !== null) {
+    results = JSON.parse(localStorage.getItem('resultsTable'));
   }
 };
 
