@@ -1,0 +1,246 @@
+.page {
+  padding-top: 10vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.section {
+  display: flex;
+}
+
+.section_menu {
+  flex-direction: column;
+  margin: 0 auto 12px;
+}
+
+.section_game {
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 8px;
+  position: relative;
+}
+
+.section_size {
+  gap: 10px;
+  align-items: center;
+}
+
+.menu {
+  list-style-type: none;
+  display: flex;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+}
+
+.menu__button {
+  background: #0d9095;
+  border: none;
+  border-radius: 3px;
+  padding: 6px 10px;
+  font-size: 18px;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.menu__button:hover {
+  background: #950d0d;
+}
+
+.menu__button_sound,
+.menu__button_sound:hover {
+  width: 40px;
+  height: 33px;
+  padding: 0;
+  background-image: url(./icons/sound.svg);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 28px 28px;
+}
+
+.menu__button_muted,
+.menu__button_muted:hover {
+  background-image: url(./icons/mute.svg);
+}
+
+.stop-game {
+  background-color: #666666;
+}
+
+.game-info {
+  margin: 0 auto;
+  display: flex;
+  gap: 28px;
+}
+
+.game-info__moves,
+.game-info__time {
+  margin: 0;
+  font-size: 16px;
+}
+
+.game-info__moves-span,
+.game-info__time-span {
+  font-size: 20px;
+}
+
+.playfield {
+  width: 400px;
+  height: 400px;
+  position: relative;
+}
+
+.playfield > :not(.playfield__item_empty):hover {
+  transition: all 0.5s ease;
+  background: #0d9095;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.playField__item {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+  border: 1px solid #c5c5c5;
+  font-size: 22px;
+  transition: all 1s ease;
+}
+
+.playfield__item_empty {
+  background: #e5e5e5;
+}
+
+.frame-size {
+  margin: 0 auto;
+  font-size: 14px;
+}
+
+.other {
+  font-size: 14px;
+}
+
+.sizes {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  gap: 3px;
+}
+
+.sizes__button {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 14px;
+  color: #337ab7;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.sizes__button:hover {
+  color: #950d0d;
+}
+
+/* TEST */
+.popup {
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.8);
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  left: 0;
+  opacity: 0;
+  position: fixed;
+  right: 0;
+  top: 0;
+  transition: visibility 0.7s, opacity 0.7s ease-in-out;
+  visibility: hidden;
+  z-index: 2;
+}
+
+.popup-container {
+  position: relative;
+  max-width: 400px;
+  box-sizing: border-box;
+  padding: 20px 30px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid transparent;
+  border-radius: 20px;
+  background: #f1f3f2;
+}
+
+.popup__info {
+  font-size: 36px;
+  text-align: center;
+}
+
+.popup-close-button {
+  background: url(./icons/close-icon.svg);
+  background-position: 50%;
+  background-repeat: no-repeat;
+  background-size: cover;
+  border: none;
+  cursor: pointer;
+  height: 14px;
+  padding: 0;
+  position: absolute;
+  right: -26px;
+  top: -14px;
+  transition: all 0.5s ease;
+  width: 14px;
+  filter: invert(42%) sepia(84%) saturate(440%) hue-rotate(133deg)
+    brightness(92%) contrast(96%);
+}
+
+.popup-close-button:hover {
+  filter: invert(16%) sepia(29%) saturate(5662%) hue-rotate(348deg) brightness(99%);
+}
+
+.popup_active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.results__list {
+  margin: 10px auto 0;
+  text-align: center;
+}
+.results__list-empty {
+  font-size: 20px;
+  line-height: 1.2;
+}
+
+@media screen and (max-width: 549px) {
+  .menu {
+    max-width: 90%;
+    margin: 0 auto;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+
+  .menu__item {
+    width: max-content;
+  }
+
+  .playfield {
+    margin: 0 auto;
+    width: 90vw;
+    height: 90vw;
+  }
+
+  .popup-container {
+    max-width: 90%;
+  }
+
+  .ipopup__info {
+    font-size: 24px;
+  }
+}
